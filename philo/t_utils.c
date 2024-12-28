@@ -6,7 +6,7 @@
 /*   By: paradari <paradari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/26 19:02:37 by paradari          #+#    #+#             */
-/*   Updated: 2024/12/28 13:41:53 by paradari         ###   ########.fr       */
+/*   Updated: 2024/12/29 01:28:40 by paradari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,40 +62,40 @@ void	ft_writing(int id, char *str, t_rules *rules)
 }
 
 
-void	ft_is_dead_or_all_ate(t_rules *r, t_philos *p)
-{
-	int	i;
+// void	ft_is_dead_or_all_ate(t_rules *r, t_philos *p)
+// {
+// 	int	i;
 
-	// (void)r;
-	// (void)p;
-	while (!(r->s_eat))
-	{
-		i = -1;
-		while (++i < r->nphilo && !(r->s_died))
-		{
-			pthread_mutex_lock(&(r->eating_lock));
-			if ((get_time_in_ms() - p[i].last_ate_time) > r->time2die)
-			{
-				ft_writing(i, "died", r);
-				r->s_died = 1;
-			}
-			pthread_mutex_unlock(&(r->eating_lock));
-		}
-		if (r->s_died == 1)
-			break ;
-		i = 0;
-		if (r->nmeal != -1)
-		{
-			pthread_mutex_lock(&(r->eating_lock));
-			while (i < r->nphilo && p[i].ate_times >= r->nmeal)
-				i++;
-			if (i == r->nphilo)
-				r->s_eat = 1;
-			pthread_mutex_unlock(&(r->eating_lock));
-		}
-	}
-	// printf ("hah\n");
-}
+// 	// (void)r;
+// 	// (void)p;
+// 	while (!(r->s_eat))
+// 	{
+// 		i = -1;
+// 		while (++i < r->nphilo && !(r->s_died))
+// 		{
+// 			pthread_mutex_lock(&(r->eating_lock));
+// 			if ((get_time_in_ms() - p[i].last_ate_time) > r->time2die)
+// 			{
+// 				ft_writing(i, "died", r);
+// 				r->s_died = 1;
+// 			}
+// 			pthread_mutex_unlock(&(r->eating_lock));
+// 		}
+// 		if (r->s_died == 1)
+// 			break ;
+// 		i = 0;
+// 		if (r->nmeal != -1)
+// 		{
+// 			pthread_mutex_lock(&(r->eating_lock));
+// 			while (i < r->nphilo && p[i].ate_times >= r->nmeal)
+// 				i++;
+// 			if (i == r->nphilo)
+// 				r->s_eat = 1;
+// 			pthread_mutex_unlock(&(r->eating_lock));
+// 		}
+// 	}
+// 	// printf ("hah\n");
+// }
 
 void	ft_end_sim(t_rules *rules, t_philos *philo)
 {

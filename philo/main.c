@@ -3,99 +3,72 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdanchal <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: paradari <paradari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/09/22 16:27:28 by kdanchal          #+#    #+#             */
-/*   Updated: 2024/09/22 16:27:30 by kdanchal         ###   ########.fr       */
+/*   Created: 2024/12/26 19:03:00 by paradari          #+#    #+#             */
+/*   Updated: 2024/12/27 10:22:46 by paradari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-char	*ft_god_look_full(t_data *data)
-{
-	int	i;
-
-	if (data->number_of_must_eat < 1)
-		return (NULL);
-	i = 0;
-	while (i < data->number_of_philosophers)
-	{
-		if (data->human_qty_full == data->number_of_philosophers)
-		{
-			pthread_mutex_lock(&data->mutex_control);
-			data->end_dinner = 1;
-			pthread_mutex_unlock(&data->mutex_control);
-			return ("all_full");
-		}
-		i++;
-	}
-	return (NULL);
-}
-
-char	*ft_god_look_die(t_data *data)
+static int	ft_is_digit(char *str)
 {
 	int	i;
 
 	i = 0;
-	while (i < data->number_of_philosophers)
+	while (str[i])
 	{
-		pthread_mutex_lock(&data->mutex_control);
-		data->philo[i].time_wait = ft_time_now_ms()
-			- data->philo[i].time_last_meal;
-		if ((data->philo[i].time_wait) >= (data->time_to_die))
-		{
-			printf("%lu	%d died\n", ft_time_now_ms()
-				- data->time_start, data->philo[i].order);
-			data->end_dinner = 1;
-			pthread_mutex_unlock(&data->mutex_control);
-			return ("die");
-		}
-		pthread_mutex_unlock(&data->mutex_control);
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
 		i++;
 	}
-	return (NULL);
+	return (1);
 }
 
-char	*ft_check_end_dinner(t_data *data)
+static int	ft_is_valid_av(int ac, char **av)
 {
-	if (ft_god_look_die(data))
-		return ("die");
-	if (ft_god_look_full(data))
-		return ("full");
-	return (NULL);
-}
+	int	i;
+	int	x;
 
-int	ft_error_exit(char *s, int exit_type)
-{
-	ft_putstr_fd(s, 2);
-	return (exit_type);
-}
-
-int	main(int argc, char **argv)
-{
-	t_data	*data;
-	int		i;
-
-	if (ft_check_input(argc, argv))
-		return (ft_error_exit("Error input", 1));
-	data = malloc(sizeof(t_data));
-	if (!data)
-		return (ft_error_exit("Error maloc: Cannot allocate memory", 1));
-	ft_memset(data, 0, sizeof(t_data));
-	if (ft_set(data, argv))
-		return (ft_error_exit("Error input", 1));
-	i = 0;
-	while (i < data->number_of_philosophers)
+	i = 1;
+	while (i < ac)
 	{
-		pthread_create(&data->philo[i].th, NULL, ft_routine, &data->philo[i]);
+		if (!ft_is_digit(av[i]))
+			return (1);
+		x = ft_atoi(av[i]);
+		if (i == 1 && (x < 1 || x == -1))
+			return (1);
+		if (x < 0)
+			return (1);
 		i++;
 	}
-	while (1)
-	{
-		if (ft_check_end_dinner(data))
-			break ;
-	}
-	ft_join_and_free(data);
 	return (0);
 }
+
+int	main(int ac, char **av)
+{
+	t_rules	rules;
+
+	if (ac != 5 && ac != 6)
+		return (err_msg("wrong format of arguments!!", 1));
+	if (ft_is_valid_av(ac, av))
+		return (err_msg("input error!!\n", 1));
+	if (ft_init_rules(&rules, av))
+		return (1);
+	if (ft_init_mutex(&rules))
+		return (1);
+	if (ft_start_sim(&rules))
+		return (err_msg("creating thread error!!\n", 1));
+}
+
+// printf ("\n----check----\n");
+// 	int i=0;
+// 	t_philos *philo;
+// 	philo = rules.philo;
+// 	while (i < rules.nphilo)
+// 	{
+// 		printf("id %d : lf=%d rf=%d ate=%d lastate=%lld\n", philo[i].philo_nb, philo[i].left_fork, philo[i].right_fork, philo[i].ate_times, philo[i].last_ate_time);
+// 		printf("rules : %d %d %d\n", philo[i].rules->time2die, philo[i].rules->time2eat, philo[i].rules->time2sleep);
+// 		i++;
+// 	}

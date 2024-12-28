@@ -3,94 +3,66 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdanchal <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: paradari <paradari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/08/27 18:05:40 by kdanchal          #+#    #+#             */
-/*   Updated: 2024/04/26 11:47:49 by kdanchal         ###   ########.fr       */
+/*   Created: 2024/12/26 19:03:12 by paradari          #+#    #+#             */
+/*   Updated: 2024/12/29 01:28:46 by paradari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef PHILOSOPHERS_H
 # define PHILOSOPHERS_H
 
-# include <pthread.h>
-# include <stdio.h>
-# include <stdlib.h>
 # include <sys/time.h>
 # include <unistd.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <pthread.h>
+# include <limits.h>
 
-# define RED "\033[0;31m"    // use red
-# define GREEN "\033[0;32m"  // use green
-# define YELLOW "\033[0;33m" // use yell
-# define BLUE "\033[0;34m"
-# define MAGENTA "\033[0;35m" // use pink
-# define CYAN "\033[0;36m"    // use blue
-# define GRAY "\033[0;37m"
-# define LRED "\033[0;91m"
-# define BOLD "\033[1m"
-# define RESET "\033[0m"
-
-typedef struct s_philo
+typedef struct s_rules
 {
-	int				order;
-	int				fork_left;
-	int				fork_right;
-	size_t			time_last_meal;
-	int				time_wait;
-	int				number_of_eat_now;
-	int				one_full;
-	pthread_t		th;
-	struct s_data	*data;
-}					t_philo;
+	int				nphilo;
+	int				time2die;
+	int				time2eat;
+	int				time2sleep;
+	int				nmeal;
+	int				s_died;
+	int				s_eat;
+	long long		start_time;
+	pthread_mutex_t	eating_lock;
+	pthread_mutex_t	writing_lock;
+	pthread_mutex_t	*forks_lock;
+	struct s_philos	*philo;
+}					t_rules;
 
-typedef struct s_data
+typedef struct s_philos
 {
-	long long		number_of_philosophers;
-	long long		time_to_die;
-	long long		time_to_eat;
-	long long		time_to_sleep;
-	long long		number_of_must_eat;
-	size_t			time_start;
-	int				end_dinner;
-	// int				human_all_full;
-	int				human_qty_full;
-	struct s_philo	*philo;
-	pthread_mutex_t	*mutex_fork;
-	pthread_mutex_t	mutex_control;
-}					t_data;
+	int				philo_nb;
+	int				left_fork;
+	int				right_fork;
+	int				ate_times;
+	long long		last_ate_time;
+	pthread_t		id;
+	struct s_rules	*rules;
+}					t_philos;
 
-// main
-char				*ft_god_look_full(t_data *data);
-char				*ft_god_look_die(t_data *data);
-char				*ft_check_end_dinner(t_data *data);
-int					ft_error_exit(char *s, int exit_type);
-// int				main(int argc, char **argv);
+int		ft_init_rules(t_rules *rules, char **av);
+int		ft_init_mutex(t_rules *rules);
 
-// ft_eat
-char				*ft_philo_full(t_philo *philo);
-void				ft_left_right(t_philo *philo);
-void				ft_right_left(t_philo *philo);
-void				ft_begin_eat_full_or_finish_eat_full(t_philo *philo);
-void				ft_eat(t_philo *philo);
+int		ft_start_sim(t_rules *rules);
 
-// ft_routine
-void				ft_think(t_philo *philo);
-void				ft_sleep(t_philo *philo);
-char				*ft_dinner_alone(t_philo *philo);
-void				*ft_routine(void *arg);
+// void	ft_is_dead_or_all_ate(t_rules *rules, t_philos *philo);
+void	ft_end_sim(t_rules *rules, t_philos *philo);
+void	ft_sleeping(long long sleeptime, t_rules *rules);
+void	ft_writing(int id, char *str, t_rules *rules);
 
-// ft_set_and_free
-void				ft_join_and_free(t_data *data);
-int					ft_set_2(t_data *data);
-int					ft_set(t_data *data, char **argv);
-char				*ft_check_input(int argc, char **argv);
-// void				ft_print_status(t_philo *philo);
 
-// t_utils
-long long			ft_atoi(const char *str);
-void				*ft_memset(void *b, int c, size_t len);
-void				ft_putstr_fd(char *s, int fd);
-size_t				ft_time_now_ms(void);
-void				ft_usleep(size_t time);
+void	ft_free_in_rules(t_rules *rules);
+time_t	get_time_in_ms(void);
+int		ft_atoi(char *str);
+int		err_msg(char *msg, int ret);
+void    *err_null_ret(char *msg, t_rules *rules);
 
 #endif
